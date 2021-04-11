@@ -4,7 +4,7 @@ set -e
 set -o pipefail
 
 FILE=
-USER=
+USER="$(whoami)"
 VERBOSITY=0
 
 #-----------------------------------------------------------
@@ -31,15 +31,18 @@ parse_arguments() {
     while [ "$#" -ge 1 ]
     do
         local ARG="$1"
+        shift 1
         case "$ARG" in
+            "--user" )
+                [[ $# -ge 1 ]] || error "--user needs another argument"
+                USER="$1"
+                shift 1
+                ;;
             "-v" | "--verbose" )
                 VERBOSITY=$((VERBOSITY + 1))
                 ;;
             * )
-                if [ -z "$USER" ]
-                then
-                    USER="$ARG"
-                elif [ -z "$FILE" ]
+                if [ -z "$FILE" ]
                 then
                     FILE="$ARG"
                 else
@@ -47,7 +50,6 @@ parse_arguments() {
                 fi
                 ;;
         esac
-        shift
     done
 }
 
