@@ -80,7 +80,7 @@ parse_arguments() {
                 print_help
                 ;;
             "--user" )
-                [[ $# -ge 1 ]] || error "--user needs another argument"
+                [[ $# -ge 1 ]] || error "$ARG needs another argument"
                 USER="$1"
                 shift 1
                 ;;
