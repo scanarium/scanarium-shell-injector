@@ -4,6 +4,7 @@ set -e
 set -o pipefail
 
 FILE=
+URL=
 USER="$(whoami)"
 VERBOSITY=0
 
@@ -30,6 +31,9 @@ The given FILE gets uploaded to Scanarium for the current system user
 
 OPTIONS:
   -h, --help        -- Prints this help page and exits
+  --url URL         -- Post the image to the url URL instead of
+                       https://$USER.scanarium.com/cgi-bin/scan-data
+                       This is useful to paste to a local Scanarium instance.
   --user USER       -- Upload to the Scanarium as USER instead of the current
                        system user.
   -v, --verbosity   -- Increases verbosity
@@ -79,6 +83,11 @@ parse_arguments() {
             "-h" | "--help" )
                 print_help
                 ;;
+            "--url" )
+                [[ $# -ge 1 ]] || error "$ARG needs another argument"
+                URL="$1"
+                shift 1
+                ;;
             "--user" )
                 [[ $# -ge 1 ]] || error "$ARG needs another argument"
                 USER="$1"
@@ -111,7 +120,7 @@ inject() {
     COMMAND+=( \
         "--netrc" \
         "--form" "data=@$FILE" \
-        "https://$USER.scanarium.com/cgi-bin/scan-data" \
+        "$URL" \
         )
 
     log_verbose "Running" "${COMMAND[@]}"
@@ -123,5 +132,10 @@ parse_arguments "$@"
 
 [[ -n "$USER" ]] || error "No user given"
 [[ -n "$FILE" ]] || error "No file given"
+
+if [ -z "$URL" ]
+then
+    URL="https://$USER.scanarium.com/cgi-bin/scan-data"
+fi
 
 inject
